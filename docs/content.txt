@@ -1,0 +1,109 @@
+
+Django Admin CKEditor
+
+CKEditor is an open source WYSIWYG text editor designed to bring common word processor features directly to web pages, simplifying their content creation. Its core code is written in JavaScript. In this article we going to use basic CKEditor in django application.
+
+Lets consider a table called Article
+
+models.py
+
+from django.db import models
+
+class Article(models.Model):
+	title 		= 	models.CharField(max_length=128)
+	content 	= 	models.TextField()
+
+	def __str__(self):
+		return self.title
+
+Register that model to django admin
+
+admin.py
+
+from django.contrib import admin
+
+from editor.models import Article
+
+admin.site.register(Article)
+
+
+The model form will be looking like this in the django admin page.
+
+https://bytebucket.org/Ajaykumar2916/blogcontent/raw/39446e14de30dfd4333cd4d2bb841a084052982a/1-django-admin-ckeditor/docs/screen-shot/withoutckeditior.png?token=0912d69936bfdd16345cf646199d23496a016497
+
+
+Next we going to change the Content TextField to CKEditor, so create a directory called 'static' and add that path in the settings file
+
+
+settings.py
+
+STATIC_URL = '/static/'
+
+STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'),)
+
+Now download the CKEditor from here http://ckeditor.com/download. Here I used Basic Package of CKEditor, After downloading extract the ckeditor into the static directory.
+
+Now create a directory called js inside static directory and create a file called custom.js and add these lines
+
+$( document ).ready(function() {
+    CKEDITOR.replace( 'id_content'); //Here the 'id_content' is the reference of the content field in the model
+});
+
+Now create a directory called css inside static directory and create a file called custom.css and add these lines
+
+.aligned label {
+  	float:none;
+}
+
+Finally download the jquery file from here https://code.jquery.com/ and put it into js directory and the static folder structure looks like this
+
+static
+	├── ckeditor
+	├── css
+	│   └── custom.css
+	└── js
+	    ├── custom.js
+	    └── jquery-2.2.4.min.js
+
+And here comes the tricky part, Django admin has the Media class to define static files(js, css) for a particular model instance. modify the admin.py like this
+
+from django.contrib import admin
+
+from editor.models import Article
+
+class ArticleAdmin(admin.ModelAdmin):
+	class Media:
+		js = (
+			'/static/js/jquery-2.2.4.min.js',
+			'/static/ckeditor/ckeditor.js',
+			'/static/js/custom.js',
+		)
+		css = {
+            'all': ('/static/css/custom.css',)
+        }
+
+admin.site.register(Article, ArticleAdmin)
+
+That's it and now we can enjoy the CKEditor in the dajngo admin page.
+
+https://bytebucket.org/Ajaykumar2916/blogcontent/raw/39446e14de30dfd4333cd4d2bb841a084052982a/1-django-admin-ckeditor/docs/screen-shot/withckeditor.png?token=1bf736f1c9ea1a88e6222dccfbd352b2829c258e
+
+You will find the source code here https://github.com/AjayKumar2916/django-admin-ckeditor
+
+I hope you have liked this article, if you face any issues please feel free to give your feebbacks in the comment secton.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
